@@ -637,9 +637,8 @@
 
   <!-- CORS NOTE -->
   <div class="cors-note" id="corsNote" style="display:none;">
-    <span>⚙ CORS PROXY ACTIVE</span> — Fetching live news via allorigins.win proxy.
-    If updates show <em>unavailable</em>, the proxy may be rate-limited.
-    Tap <strong>↻</strong> to retry. Tap <strong>?</strong> for setup options.
+    <span>⚙ CORS PROXY ACTIVE</span> — Fetching live news via 3-proxy fallback chain (corsproxy.io → allorigins → codetabs).
+    If updates still show <em>unavailable</em>, tap <strong>↻</strong> to retry.
   </div>
 
   <!-- SOURCE CARDS (populated by JS) -->
@@ -699,7 +698,13 @@
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const PROXY = 'https://api.allorigins.win/get?url=';
+
+// Multiple proxies tried in order until one succeeds
+const PROXIES = [
+  { url: 'https://corsproxy.io/?', mode: 'direct' },
+  { url: 'https://api.allorigins.win/get?url=', mode: 'allorigins' },
+  { url: 'https://api.codetabs.com/v1/proxy?quest=', mode: 'direct' },
+];
 
 const SOURCES = [
   {
@@ -959,20 +964,32 @@ function updateAlertBanner() {
 async function fetchSource(src) {
   renderCardLoading(src);
 
+  // Try every proxy in sequence until one works
   const tryFetch = async (targetUrl) => {
-    const proxyUrl = PROXY + encodeURIComponent(targetUrl);
-    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const json = await resp.json();
-    if (!json.contents) throw new Error('Empty response');
-    return json.contents;
+    for (const proxy of PROXIES) {
+      try {
+        const proxyUrl = proxy.url + encodeURIComponent(targetUrl);
+        const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
+        if (!resp.ok) continue;
+        // allorigins wraps content in JSON; others return raw text
+        if (proxy.mode === 'allorigins') {
+          const json = await resp.json();
+          if (json && json.contents && json.contents.length > 200) return json.contents;
+        } else {
+          const text = await resp.text();
+          if (text && text.length > 200) return text;
+        }
+      } catch (e) {
+        continue; // try next proxy
+      }
+    }
+    throw new Error('All proxies failed');
   };
 
   let html = null;
   try {
     html = await tryFetch(src.url);
   } catch (e1) {
-    // Try fallback URL
     try {
       html = await tryFetch(src.fallback);
     } catch (e2) {
