@@ -2,246 +2,499 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Gulf War Live">
-<title>🛡️ Gulf War Live</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#080b0f">
+<title>Gulf War Live — UAE &amp; Gulf Region</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080b0f;--bg2:#0d1117;--bg3:#111820;--panel:#131c26;--bdr:#1e2e3e;--bdr2:#243444;--cyan:#00e5ff;--red:#ff4444;--amber:#ffc107;--green:#00ff88;--txt:#c8d8e8;--txt2:#7a9ab8;--txt3:#4a6a88;--mono:'Share Tech Mono',monospace;--cond:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--txt);font-family:var(--body);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);pointer-events:none;z-index:9999}
-.topbar{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#080b0f 0%,rgba(8,11,15,.93) 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);padding:14px 16px 10px}
-.topbar-row{display:flex;align-items:center;justify-content:space-between}
-.brand-title{font-family:var(--cond);font-weight:900;font-size:24px;letter-spacing:.08em;color:#fff;text-transform:uppercase;line-height:1}
-.brand-title span{color:var(--cyan)}
-.brand-sub{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.info-btn{background:none;border:1px solid var(--bdr2);color:var(--txt3);border-radius:50%;width:26px;height:26px;font-family:var(--mono);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
-.dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber)}
-.dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.prog{height:2px;background:var(--bdr);overflow:hidden;margin-top:9px}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));width:0%;transition:width .3s ease;box-shadow:0 0 8px var(--cyan)}
-.meta{display:flex;align-items:center;justify-content:space-between;padding:6px 16px;background:var(--bg2);border-bottom:1px solid var(--bdr);font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:.1em}
-.live-tag{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:1px 6px;border-radius:2px;font-size:8px;letter-spacing:.12em}
-.main{padding:12px 12px 110px;display:flex;flex-direction:column;gap:10px}
-.alert-banner{display:none;align-items:center;gap:10px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);border-radius:5px;padding:10px 12px;animation:flash 1s ease-in-out 4}
-.alert-banner.on{display:flex}
-@keyframes flash{0%,100%{border-color:rgba(255,68,68,.4)}50%{border-color:var(--red)}}
-.alert-icon{font-size:18px;flex-shrink:0}
-.alert-title{font-family:var(--cond);font-weight:700;font-size:13px;color:var(--red);letter-spacing:.08em;text-transform:uppercase}
-.alert-kw{font-family:var(--mono);font-size:9px;color:rgba(255,68,68,.7);letter-spacing:.1em;margin-top:2px}
-.card{background:var(--panel);border:1px solid var(--bdr);border-radius:6px;overflow:hidden;opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease,border-color .3s}
-.card.show{opacity:1;transform:translateY(0)}
-.card.loading{border-color:rgba(255,193,7,.25)}
-.card.error{border-color:rgba(255,68,68,.2)}
-.card.done{border-color:rgba(0,229,255,.18)}
-.card-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--bdr);background:rgba(0,0,0,.25)}
-.card-name{font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:7px}
-.card-name::before{content:'';width:3px;height:14px;background:var(--cyan);border-radius:2px;flex-shrink:0}
-.card-name.err::before{background:var(--red)}
-.card-name.ldg::before{background:var(--amber)}
-.card-badge{font-family:var(--mono);font-size:8px;color:var(--txt3);letter-spacing:.1em}
-.card-badge.red{color:var(--red)}
-.card-body{padding:10px 12px;min-height:50px}
-.skel{height:10px;background:linear-gradient(90deg,var(--bdr) 25%,var(--bdr2) 50%,var(--bdr) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:3px;margin-bottom:8px}
-.skel:last-child{width:55%;margin-bottom:0}
+:root{
+  --bg:#080b0f;--panel:#111a24;--panel2:#0d1520;
+  --border:#1e2e3e;--border2:#253545;
+  --cyan:#00e5ff;--cyan-dim:rgba(0,229,255,0.12);
+  --red:#ff4444;--red-dim:rgba(255,68,68,0.10);
+  --amber:#ffc107;--amber-dim:rgba(255,193,7,0.10);
+  --green:#00ff88;
+  --text:#c8d8e8;--muted:#7a9ab8;--subtle:#4a6a88;
+  --topbar-h:58px;--metabar-h:30px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:400;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;background:repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(0,229,255,0.011) 2px,rgba(0,229,255,0.011) 4px);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:8999;opacity:0.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");}
+
+#topbar{position:sticky;top:0;z-index:600;background:rgba(8,11,15,0.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+#topbar-inner{max-width:1100px;margin:0 auto;height:var(--topbar-h);padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+#app-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(18px,4vw,26px);letter-spacing:0.07em;color:var(--text);text-transform:uppercase;line-height:1;white-space:nowrap;}
+#app-title .lw{color:var(--cyan);}
+#title-sub{font-family:'Share Tech Mono',monospace;font-size:clamp(7px,1.5vw,9px);color:var(--subtle);letter-spacing:0.15em;white-space:nowrap;margin-top:2px;}
+#topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.icon-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);background:rgba(30,46,62,0.5);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s;flex-shrink:0;}
+.icon-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+#status-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);transition:background .3s,box-shadow .3s;flex-shrink:0;}
+#status-dot.loading{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:pdot 1s ease-in-out infinite;}
+#status-dot.error{background:var(--red);box-shadow:0 0 8px var(--red);}
+@keyframes pdot{0%,100%{opacity:1}50%{opacity:.3}}
+#progress-track{height:2px;background:rgba(30,46,62,0.6);overflow:hidden;}
+#progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--green));box-shadow:0 0 8px rgba(0,229,255,0.7);transition:width .45s cubic-bezier(.4,0,.2,1);}
+
+#metabar{position:sticky;top:calc(var(--topbar-h) + 2px);z-index:599;background:rgba(11,16,24,0.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,46,62,0.5);height:var(--metabar-h);}
+#metabar-inner{max-width:1100px;margin:0 auto;height:100%;padding:0 18px;display:flex;align-items:center;justify-content:space-between;}
+#meta-left{font-family:'Share Tech Mono',monospace;font-size:clamp(8px,1.6vw,9px);color:var(--subtle);letter-spacing:0.12em;display:flex;align-items:center;gap:6px;}
+.live-pip{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2.4s step-end infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+#meta-right{font-family:'Share Tech Mono',monospace;font-size:clamp(8px,1.6vw,9px);color:var(--subtle);letter-spacing:0.08em;white-space:nowrap;}
+
+#page{max-width:1100px;margin:0 auto;padding:16px 18px 80px;}
+
+/* DIAG */
+#diag-banner{display:none;background:var(--amber-dim);border:1px solid var(--amber);border-radius:6px;padding:11px 14px;margin-bottom:12px;}
+#diag-banner.visible{display:block;}
+#diag-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.16em;color:var(--amber);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+#diag-body{font-family:'Share Tech Mono',monospace;font-size:10px;color:#d4b060;letter-spacing:0.05em;line-height:1.8;max-height:220px;overflow-y:auto;}
+
+/* ALERT */
+#alert-banner{display:none;background:var(--red-dim);border:1px solid var(--red);border-radius:6px;padding:11px 14px;margin-bottom:12px;}
+#alert-banner.visible{display:block;}
+#alert-banner.flash{animation:flash-b .55s ease 3;}
+@keyframes flash-b{0%,100%{border-color:var(--red);box-shadow:none}50%{border-color:#ff8080;box-shadow:0 0 20px rgba(255,68,68,0.45)}}
+#alert-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.16em;color:var(--red);text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+#alert-keywords{font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff8080;letter-spacing:0.07em;line-height:1.6;word-break:break-word;}
+
+#rss-note{font-family:'Share Tech Mono',monospace;font-size:clamp(8px,1.5vw,9px);color:var(--subtle);letter-spacing:0.07em;margin-bottom:14px;padding:7px 12px;border:1px solid rgba(30,46,62,0.9);border-radius:5px;background:rgba(10,15,22,0.6);line-height:1.6;}
+
+#cards-wrap{display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:720px){#cards-wrap{grid-template-columns:1fr 1fr;}}
+
+.source-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--subtle);border-radius:7px;overflow:hidden;opacity:0;transform:translateY(14px);animation:card-in .4s ease forwards;display:flex;flex-direction:column;}
+.source-card.done{border-left-color:var(--cyan);}
+.source-card.loading{border-left-color:var(--amber);}
+.source-card.error{border-left-color:var(--red);}
+@keyframes card-in{to{opacity:1;transform:translateY(0);}}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-bottom:1px solid rgba(30,46,62,0.8);background:var(--panel2);gap:8px;}
+.card-source-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(12px,2.5vw,14px);letter-spacing:0.1em;text-transform:uppercase;color:var(--text);white-space:nowrap;}
+.card-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.08em;padding:3px 8px;border-radius:3px;background:rgba(30,46,62,0.9);color:var(--muted);text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+.source-card.done .card-badge{color:var(--cyan);}
+.source-card.loading .card-badge{color:var(--amber);}
+.source-card.error .card-badge{color:var(--red);}
+.card-body{flex:1;}
+
+.skeleton-wrap{padding:11px 13px;display:flex;flex-direction:column;gap:11px;}
+.skeleton-item{display:flex;flex-direction:column;gap:5px;}
+.skel-line{height:11px;border-radius:3px;background:linear-gradient(90deg,#1a2838 25%,#243344 50%,#1a2838 75%);background-size:200% 100%;animation:shimmer 1.6s ease-in-out infinite;}
+.skel-line.w80{width:80%;}.skel-line.w55{width:55%;}.skel-line.w35{width:35%;height:8px;}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.item-list{display:flex;flex-direction:column;gap:7px}
-.item{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;background:rgba(0,0,0,.2);border-radius:4px;border-left:2px solid var(--bdr2)}
-.item.uae{border-left-color:var(--cyan);background:rgba(0,229,255,.04)}
-.item.alrt{border-left-color:var(--red);background:rgba(255,68,68,.05)}
-.item-bul{font-family:var(--mono);font-size:9px;color:var(--txt3);padding-top:2px;flex-shrink:0}
-.item-txt{font-size:12.5px;line-height:1.55;color:var(--txt)}
-.item-src{font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:3px}
-.item-src a{color:var(--txt3);text-decoration:none}
-.kw-uae{color:var(--cyan);font-weight:600}
-.kw-alrt{color:var(--red);font-weight:600}
-.err-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;padding:4px 0}
-.fab{position:fixed;bottom:32px;right:20px;z-index:200;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#00c4e0,#006880);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,229,255,.35),0 0 0 1px rgba(0,229,255,.2);transition:transform .15s,box-shadow .15s}
-.fab:active{transform:scale(.92)}
-.fab svg{width:25px;height:25px;fill:#fff}
-.fab.spin svg{animation:spin .7s linear infinite}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.fab-lbl{position:absolute;bottom:-20px;font-family:var(--mono);font-size:8px;color:var(--txt3);letter-spacing:.1em}
-.footer-fade{position:fixed;bottom:0;left:0;right:0;height:32px;background:linear-gradient(0deg,#080b0f 60%,transparent);pointer-events:none;z-index:150}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-end;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-.overlay.open{display:flex}
-.modal{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-bottom:none;border-radius:16px 16px 0 0;padding:20px 20px 44px;display:flex;flex-direction:column;gap:14px;transform:translateY(100%);transition:transform .35s cubic-bezier(.16,1,.3,1)}
-.overlay.open .modal{transform:translateY(0)}
-.modal-handle{width:36px;height:4px;background:var(--bdr2);border-radius:4px;margin:0 auto 2px}
-.modal-title{font-family:var(--cond);font-weight:800;font-size:19px;color:#fff;letter-spacing:.06em;text-transform:uppercase}
-.modal-body{font-size:13px;line-height:1.65;color:var(--txt2)}
-.modal-steps{list-style:none;display:flex;flex-direction:column;gap:10px}
-.modal-steps li{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--txt2)}
-.step-n{width:20px;height:20px;border-radius:50%;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cyan);font-family:var(--mono);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.modal-close{background:var(--cyan);color:var(--bg);border:none;border-radius:8px;padding:13px;font-family:var(--cond);font-weight:800;font-size:16px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;width:100%}
+
+.news-list{display:flex;flex-direction:column;}
+.news-item{display:block;text-decoration:none;padding:10px 13px 10px 15px;border-bottom:1px solid rgba(30,46,62,0.45);background:transparent;position:relative;cursor:pointer;transition:background .14s;-webkit-tap-highlight-color:transparent;}
+.news-item:last-child{border-bottom:none;}
+.news-item:hover{background:rgba(0,229,255,0.04);}
+.news-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--subtle);}
+.news-item.uae-match::before{background:var(--cyan);}
+.news-item.alert-match::before{background:var(--red);}
+.news-title{font-family:'Barlow',sans-serif;font-weight:500;font-size:clamp(12px,2vw,13.5px);line-height:1.45;color:var(--text);}
+.news-bullet{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--subtle);margin-right:4px;}
+.kw-uae{color:var(--cyan);font-weight:600;}
+.kw-alert{color:var(--red);font-weight:600;}
+.news-desc{font-family:'Barlow',sans-serif;font-weight:300;font-size:clamp(10.5px,1.8vw,12px);color:var(--muted);line-height:1.5;margin-top:4px;}
+.news-time{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--subtle);letter-spacing:0.07em;margin-top:5px;}
+
+.card-error{padding:14px;display:flex;align-items:flex-start;gap:10px;font-family:'Barlow',sans-serif;font-size:12px;color:var(--red);background:var(--red-dim);line-height:1.65;}
+.card-error-icon{font-size:18px;flex-shrink:0;}
+.card-error code{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);background:rgba(0,229,255,0.1);padding:1px 5px;border-radius:3px;}
+
+#refresh-wrap{display:flex;align-items:center;justify-content:center;margin-top:22px;margin-bottom:10px;}
+#refresh-btn{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border2);border-radius:30px;padding:11px 24px 11px 20px;cursor:pointer;color:var(--cyan);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;transition:border-color .2s,background .2s,box-shadow .2s;user-select:none;-webkit-user-select:none;}
+#refresh-btn:hover{border-color:var(--cyan);background:var(--cyan-dim);box-shadow:0 0 20px rgba(0,229,255,0.18);}
+#refresh-icon{width:18px;height:18px;stroke:var(--cyan);flex-shrink:0;}
+#refresh-icon.spinning{animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+#footer{text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--subtle);letter-spacing:0.1em;padding-top:18px;border-top:1px solid rgba(30,46,62,0.5);margin-top:10px;}
+
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9100;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);}
+#modal-overlay.open{display:flex;}
+#modal-sheet{width:100%;max-width:580px;background:#0d1720;border:1px solid var(--border2);border-bottom:none;border-radius:14px 14px 0 0;padding:0 22px 32px;max-height:82vh;overflow-y:auto;transform:translateY(100%);transition:transform .38s cubic-bezier(0.32,0.72,0,1);-webkit-overflow-scrolling:touch;}
+#modal-overlay.open #modal-sheet{transform:translateY(0);}
+.modal-handle{width:38px;height:4px;background:var(--border2);border-radius:2px;margin:14px auto 20px;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text);margin-bottom:18px;}
+.modal-section{margin-bottom:18px;}
+.modal-label{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--cyan);margin-bottom:7px;}
+.modal-text{font-family:'Barlow',sans-serif;font-weight:300;font-size:13px;color:var(--muted);line-height:1.65;}
+.modal-text code{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--cyan);background:rgba(0,229,255,0.08);padding:1px 5px;border-radius:3px;}
+.modal-sources{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:7px;}
+.modal-sources li{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text);letter-spacing:0.06em;padding:6px 10px;background:rgba(30,46,62,0.45);border-radius:4px;border-left:2px solid var(--cyan);}
+#modal-close{width:100%;padding:13px;background:rgba(0,229,255,0.09);border:1px solid rgba(0,229,255,0.28);border-radius:8px;color:var(--cyan);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;margin-top:6px;transition:background .2s;}
+#modal-close:hover{background:rgba(0,229,255,0.16);}
+@media(min-width:900px){#page{padding:20px 24px 80px;}#topbar-inner,#metabar-inner{padding:0 24px;}}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="topbar-row">
+
+<div id="topbar">
+  <div id="topbar-inner">
     <div>
-      <div class="brand-title">&#x1F6E1;&#xFE0F; Gulf War <span>LIVE</span></div>
-      <div class="brand-sub">UAE &middot; Dubai &middot; Gulf Region Focus</div>
+      <div id="app-title">GULF WAR <span class="lw">LIVE</span></div>
+      <div id="title-sub">UAE · DUBAI · GULF REGION INTELLIGENCE FEED</div>
     </div>
-    <div class="topbar-right">
-      <button class="info-btn" onclick="openModal()">?</button>
-      <div class="dot" id="dot"></div>
-    </div>
-  </div>
-  <div class="prog"><div class="prog-fill" id="prog"></div></div>
-</div>
-<div class="meta">
-  <div style="display:flex;align-items:center;gap:8px">
-    <span class="live-tag">RSS</span>
-    <span>4 SOURCES &middot; UAE FILTERED</span>
-  </div>
-  <span id="ts">&mdash;</span>
-</div>
-<div class="main">
-  <div class="alert-banner" id="alertBanner">
-    <div class="alert-icon">&#x26A0;&#xFE0F;</div>
-    <div>
-      <div class="alert-title">Critical Keywords Detected</div>
-      <div class="alert-kw" id="alertKw"></div>
+    <div id="topbar-right">
+      <div class="icon-btn" onclick="toggleDiag()" title="Network diagnostics">⚙</div>
+      <div class="icon-btn" onclick="openModal()" title="About">?</div>
+      <div id="status-dot" class="loading"></div>
     </div>
   </div>
-  <div id="card-kt" class="card loading"></div>
-  <div id="card-tn" class="card loading"></div>
-  <div id="card-gn" class="card loading"></div>
-  <div id="card-aj" class="card loading"></div>
+  <div id="progress-track"><div id="progress-fill"></div></div>
 </div>
-<button class="fab" id="fab" onclick="runAll()">
-  <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-  <span class="fab-lbl">REFRESH</span>
-</button>
-<div class="footer-fade"></div>
-<div class="overlay" id="overlay" onclick="maybeClose(event)">
-  <div class="modal">
+
+<div id="metabar">
+  <div id="metabar-inner">
+    <div id="meta-left"><span class="live-pip"></span>LIVE &nbsp;·&nbsp; 4 SOURCES &nbsp;·&nbsp; UAE PRIORITY FILTER</div>
+    <div id="meta-right">--:-- · -- ---</div>
+  </div>
+</div>
+
+<div id="page">
+
+  <div id="diag-banner">
+    <div id="diag-title">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#ffc107" stroke-width="1.5"/><line x1="6" y1="3.5" x2="6" y2="6.5" stroke="#ffc107" stroke-width="1.5" stroke-linecap="round"/><circle cx="6" cy="8.2" r="0.7" fill="#ffc107"/></svg>
+      NETWORK DIAGNOSTICS — Click ⚙ to hide
+    </div>
+    <div id="diag-body"></div>
+  </div>
+
+  <div id="alert-banner">
+    <div id="alert-title">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polygon points="6.5,1.2 12,11.5 1,11.5" fill="none" stroke="#ff4444" stroke-width="1.5" stroke-linejoin="round"/><line x1="6.5" y1="5" x2="6.5" y2="8" stroke="#ff4444" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.5" cy="9.6" r="0.75" fill="#ff4444"/></svg>
+      ALERT — CRITICAL KEYWORDS DETECTED
+    </div>
+    <div id="alert-keywords"></div>
+  </div>
+
+  <div id="rss-note">⚡ LIVE RSS — 5-proxy fallback chain: rss2json → allorigins → corsproxy → thingproxy → htmldriven &nbsp;·&nbsp; Tap headlines to read full articles</div>
+
+  <div id="cards-wrap"></div>
+
+  <div id="refresh-wrap">
+    <button id="refresh-btn" onclick="handleRefresh()">
+      <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+      Refresh All Sources
+    </button>
+  </div>
+
+  <div id="footer">GULF WAR LIVE &nbsp;·&nbsp; DATA VIA PUBLIC RSS &nbsp;·&nbsp; NO AFFILIATION WITH ANY NEWS ORGANISATION</div>
+</div>
+
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">How It Works</div>
-    <div class="modal-body">Fetches live <strong style="color:var(--cyan)">RSS feeds</strong> from 4 Gulf news sources via a CORS proxy. RSS is built for apps &mdash; it is never blocked by news sites.</div>
-    <ol class="modal-steps">
-      <li><span class="step-n">1</span><span>Must be opened in <strong>Safari</strong> on iPhone</span></li>
-      <li><span class="step-n">2</span><span>Tap <strong>Share &rarr; Add to Home Screen</strong> for app-like access</span></li>
-      <li><span class="step-n">3</span><span>Tap <strong>&#x21BB;</strong> any time to fetch latest headlines</span></li>
-      <li><span class="step-n">4</span><span><span style="color:var(--cyan)">Cyan</span> = UAE/Gulf keywords &middot; <span style="color:var(--red)">Red</span> = alert words</span></li>
-    </ol>
-    <button class="modal-close" onclick="closeModal()">Got It</button>
+    <div class="modal-title">About Gulf War Live</div>
+
+    <div class="modal-section">
+      <div class="modal-label">If feeds show UNAVAILABLE</div>
+      <div class="modal-text">
+        The most common cause is opening the file directly from your desktop (<code>file://</code>). Browsers block all cross-origin network requests from file origins as a security policy — no proxy can work around this.<br><br>
+        <strong style="color:var(--cyan)">Solution:</strong> Serve the file from a local web server:<br><br>
+        <code>python3 -m http.server 8080</code><br><br>
+        Run that in the folder containing index.html, then open <code>http://localhost:8080</code> in your browser. Everything will work immediately.
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">Proxy Chain (5 fallbacks)</div>
+      <div class="modal-text">rss2json.com → allorigins.win → corsproxy.io → thingproxy.freeboard.io → cors-proxy.htmldriven.com</div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">News Sources</div>
+      <ul class="modal-sources">
+        <li>KHALEEJ TIMES — khaleejtimes.com</li>
+        <li>THE NATIONAL — thenationalnews.com</li>
+        <li>GULF NEWS — gulfnews.com</li>
+        <li>AL JAZEERA — aljazeera.com</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">Filtering &amp; Alerts</div>
+      <div class="modal-text">UAE/Gulf headlines appear first highlighted in <span style="color:var(--cyan);font-weight:600;">cyan</span>. Critical terms (missile, airstrike, nuclear…) trigger the red alert banner and are highlighted in <span style="color:var(--red);font-weight:600;">red</span>.</div>
+    </div>
+
+    <button id="modal-close" onclick="closeModal()">Close</button>
   </div>
 </div>
+
 <script>
-const PROXIES=[
-  u=>'https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(u)+'&count=20',
-  u=>'https://api.allorigins.win/get?url='+encodeURIComponent(u),
-  u=>'https://corsproxy.io/?'+encodeURIComponent(u),
-];
+'use strict';
+
+const UAE_KW=['UAE','Dubai','Abu Dhabi','Gulf','airport','airspace','Emirati','Emirates','ADNOC','Hormuz','Strait'];
+const WAR_KW=['Iran','Israel','US','ceasefire','hostage','Trump','Pentagon','war','military','forces','troops','weapon','conflict','sanction','attack','strike','missile','explosion','evacuate','bomb','warning','emergency','nuclear','closure','closed','airstrike','rocket','ballistic','intercept'];
+const ALERT_KW=['attack','strike','missile','explosion','evacuate','bomb','warning','emergency','nuclear','closure','closed','airstrike','rocket','ballistic','intercept'];
+
 const SOURCES=[
-  {id:'kt',label:'Khaleej Times',feeds:['https://www.khaleejtimes.com/rss','https://www.khaleejtimes.com/rss/uae','https://www.khaleejtimes.com/rss/world'],max:6},
-  {id:'tn',label:'The National',feeds:['https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml','https://www.thenationalnews.com/rss/world.xml','https://www.thenationalnews.com/rss/home.xml'],max:6},
-  {id:'gn',label:'Gulf News',feeds:['https://gulfnews.com/rss/world','https://gulfnews.com/rss','https://gulfnews.com/rss/uae'],max:5},
-  {id:'aj',label:'Al Jazeera',feeds:['https://www.aljazeera.com/xml/rss/all.xml','https://www.aljazeera.com/rss/all.xml'],max:5},
+  {id:'kt',name:'Khaleej Times',max:6,feeds:['https://www.khaleejtimes.com/rss','https://www.khaleejtimes.com/feed','https://www.khaleejtimes.com/arc/outboundfeeds/rss/']},
+  {id:'tn',name:'The National',max:6,feeds:['https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml','https://www.thenationalnews.com/rss/world.xml','https://www.thenationalnews.com/rss/mena.xml']},
+  {id:'gn',name:'Gulf News',max:5,feeds:['https://gulfnews.com/rss/world','https://gulfnews.com/rss/uae','https://gulfnews.com/rss']},
+  {id:'aj',name:'Al Jazeera',max:5,feeds:['https://www.aljazeera.com/xml/rss/all.xml','https://www.aljazeera.com/rss/all.xml']}
 ];
-const UAE_KW=['UAE','Dubai','Abu Dhabi','Gulf','airport','airspace','Emirati','Emirates','ADNOC','Hormuz'];
-const ALRT_KW=['attack','strike','missile','explosion','evacuate','bomb','warning','emergency','nuclear','airstrike','rocket','ballistic','intercept','closure','closed'];
-const WAR_KW=['Iran','Israel','ceasefire','hostage','Trump','Pentagon','war','military','conflict','sanction','weapon'];
-let busy=false,alertWords=new Set();
-const $=id=>document.getElementById(id);
-function setDot(s){$('dot').className='dot'+(s==='loading'?' loading':s==='error'?' error':'')}
-function setProg(p){$('prog').style.width=p+'%'}
-function stamp(){const n=new Date();$('ts').textContent=n.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' \u00B7 '+n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function rxEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
-function highlight(t){
-  let s=esc(t);
-  UAE_KW.forEach(k=>{s=s.replace(new RegExp('('+rxEsc(k)+')','gi'),'<span class="kw-uae">$1</span>')});
-  ALRT_KW.forEach(k=>{s=s.replace(new RegExp('('+rxEsc(k)+')','gi'),'<span class="kw-alrt">$1</span>')});
+
+let isLoading=false,diagVisible=false;
+const diagLog=[];
+
+/* ── utils ── */
+function stripHtml(s){return(s||'').replace(/<[^>]+>/g,'');}
+function decodeEnt(s){
+  return(s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+    .replace(/&#039;/g,"'").replace(/&apos;/g,"'").replace(/&nbsp;/g,' ')
+    .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(n)).replace(/&[a-z]+;/gi,' ');
+}
+function clean(s){return decodeEnt(stripHtml(s||'')).trim();}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function kwMatch(text,kws){const lo=(text||'').toLowerCase();return kws.some(k=>lo.includes(k.toLowerCase()));}
+function fmtDate(s){
+  try{const d=new Date(s);if(isNaN(d))return'';
+    const h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');
+    const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+    return`${h}:${m} · ${d.getDate()} ${mo}`;}catch{return'';}
+}
+function highlight(text){
+  let s=esc(text);
+  ALERT_KW.forEach(kw=>{const re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');s=s.replace(re,'<span class="kw-alert">$1</span>');});
+  UAE_KW.forEach(kw=>{
+    const re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    s=s.replace(re,(match,p1,offset,str)=>{
+      const before=str.slice(0,offset);
+      return(before.match(/<span/g)||[]).length>(before.match(/<\/span>/g)||[]).length?match:'<span class="kw-uae">'+p1+'</span>';
+    });
+  });
   return s;
 }
-function isUAE(t){return UAE_KW.some(k=>t.toLowerCase().includes(k.toLowerCase()))}
-function isAlrt(t){return ALRT_KW.some(k=>t.toLowerCase().includes(k.toLowerCase()))}
-function isWar(t){return WAR_KW.some(k=>t.toLowerCase().includes(k.toLowerCase()))||isAlrt(t)||isUAE(t)}
-function collectAlerts(items){items.forEach(i=>{ALRT_KW.forEach(k=>{if(i.title.toLowerCase().includes(k.toLowerCase()))alertWords.add(k)})})}
-function showAlertBanner(){const b=$('alertBanner');if(alertWords.size>0){b.classList.add('on');$('alertKw').textContent='Detected: '+[...alertWords].join(' \u00B7 ').toUpperCase()}else{b.classList.remove('on')}}
-function stripHtml(s){return s.replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#039;/g,"'").replace(/&nbsp;/g,' ').replace(/&rsquo;/g,"'").replace(/&ldquo;/g,'"').replace(/&rdquo;/g,'"').replace(/&ndash;/g,'\u2013').replace(/&mdash;/g,'\u2014').replace(/\s+/g,' ').trim()}
-function parseRss2Json(j){if(!j.items||!j.items.length)return[];return j.items.map(i=>({title:i.title?stripHtml(i.title):'',link:i.link||'',date:i.pubDate?new Date(i.pubDate):new Date(0)})).filter(i=>i.title.length>10)}
-function parseRawXml(xml){
-  const items=[];
-  const rx=/<item[\s\S]*?<\/item>/gi;
-  const txRx=/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>|<title[^>]*>([\s\S]*?)<\/title>/i;
-  const lxRx=/<link[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/i;
-  const dxRx=/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i;
-  let m;
-  while((m=rx.exec(xml))!==null){
-    const b=m[0];
-    const tm=txRx.exec(b);const lm=lxRx.exec(b);const dm=dxRx.exec(b);
-    const title=tm?(tm[1]||tm[2]||'').trim():'';
-    const link=lm?(lm[1]||'').trim():'';
-    const date=dm?new Date(dm[1]):new Date(0);
-    if(title.length>10)items.push({title:stripHtml(title),link,date});
-  }
-  return items;
+function filterItems(raw,maxItems){
+  const items=raw.map(it=>({title:clean(it.title),description:clean(it.description),link:it.link||'#',pubDate:it.pubDate||''}));
+  const uae=items.filter(it=>kwMatch(it.title+' '+it.description,UAE_KW));
+  const war=items.filter(it=>kwMatch(it.title+' '+it.description,WAR_KW));
+  const seen=new Set(),merged=[];
+  [...uae,...war].forEach(it=>{const k=it.title.slice(0,40);if(!seen.has(k)){seen.add(k);merged.push(it);}});
+  if(!merged.length)items.forEach(it=>{const k=it.title.slice(0,40);if(!seen.has(k)){seen.add(k);merged.push(it);}});
+  return merged.slice(0,maxItems);
 }
-async function fetchFeed(url){
-  // Try rss2json
-  try{const r=await fetch(PROXIES[0](url),{signal:AbortSignal.timeout(10000)});if(r.ok){const j=await r.json();if(j.status==='ok'&&j.items&&j.items.length)return parseRss2Json(j)}}catch(e){}
-  // Try allorigins
-  try{const r=await fetch(PROXIES[1](url),{signal:AbortSignal.timeout(10000)});if(r.ok){const j=await r.json();if(j.contents&&j.contents.length>100)return parseRawXml(j.contents)}}catch(e){}
-  // Try corsproxy
-  try{const r=await fetch(PROXIES[2](url),{signal:AbortSignal.timeout(10000)});if(r.ok){const t=await r.text();if(t&&t.length>100)return parseRawXml(t)}}catch(e){}
+
+/* ── diag ── */
+function log(msg){diagLog.push(msg);if(diagVisible)renderDiag();}
+function renderDiag(){const el=document.getElementById('diag-body');if(el)el.innerHTML=diagLog.map(l=>`<div>${l}</div>`).join('');}
+function toggleDiag(){
+  diagVisible=!diagVisible;
+  const b=document.getElementById('diag-banner');
+  if(diagVisible){b.classList.add('visible');renderDiag();}else{b.classList.remove('visible');}
+}
+
+/* ── XML parser ── */
+function parseXML(xml){
+  if(!xml||xml.length<60)return null;
+  try{
+    const doc=new DOMParser().parseFromString(xml,'application/xml');
+    if(doc.querySelector('parsererror'))return null;
+    const items=[...doc.querySelectorAll('item')];
+    if(items.length) return items.map(el=>({
+      title:el.querySelector('title')?.textContent||'',
+      description:el.querySelector('description')?.textContent||el.querySelector('summary')?.textContent||'',
+      link:(el.querySelector('link')?.textContent||el.querySelector('link')?.getAttribute('href')||'').trim(),
+      pubDate:el.querySelector('pubDate')?.textContent||''
+    }));
+    const entries=[...doc.querySelectorAll('entry')];
+    if(entries.length) return entries.map(el=>({
+      title:el.querySelector('title')?.textContent||'',
+      description:el.querySelector('summary')?.textContent||el.querySelector('content')?.textContent||'',
+      link:el.querySelector('link[rel="alternate"]')?.getAttribute('href')||el.querySelector('link')?.getAttribute('href')||'',
+      pubDate:el.querySelector('updated')?.textContent||el.querySelector('published')?.textContent||''
+    }));
+    return null;
+  }catch{return null;}
+}
+
+/* ── timed fetch ── */
+async function tfetch(url,opts={},ms=13000){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms);
+  try{const r=await fetch(url,{...opts,signal:ctrl.signal});clearTimeout(t);return r;}
+  catch(e){clearTimeout(t);throw e;}
+}
+
+/* ── proxy strategies ── */
+async function via_rss2json(feedUrl){
+  const r=await tfetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}&count=20`);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const d=await r.json();
+  if(d.status==='ok'&&d.items?.length>0)return d.items;
+  throw new Error('status='+d.status);
+}
+async function via_allorigins(feedUrl){
+  const r=await tfetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const d=await r.json();
+  const items=parseXML(d.contents);
+  if(items?.length>0)return items;
+  throw new Error('empty/parse fail');
+}
+async function via_corsproxy(feedUrl){
+  const r=await tfetch(`https://corsproxy.io/?${encodeURIComponent(feedUrl)}`);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const items=parseXML(await r.text());
+  if(items?.length>0)return items;
+  throw new Error('empty/parse fail');
+}
+async function via_thingproxy(feedUrl){
+  const r=await tfetch(`https://thingproxy.freeboard.io/fetch/${feedUrl}`,{},10000);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const items=parseXML(await r.text());
+  if(items?.length>0)return items;
+  throw new Error('empty/parse fail');
+}
+async function via_htmldriven(feedUrl){
+  const r=await tfetch(`https://cors-proxy.htmldriven.com/?url=${encodeURIComponent(feedUrl)}`,{},10000);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const items=parseXML(await r.text());
+  if(items?.length>0)return items;
+  throw new Error('empty/parse fail');
+}
+
+const STRATEGIES=[
+  {name:'rss2json',  fn:via_rss2json},
+  {name:'allorigins',fn:via_allorigins},
+  {name:'corsproxy', fn:via_corsproxy},
+  {name:'thingproxy',fn:via_thingproxy},
+  {name:'htmldriven',fn:via_htmldriven}
+];
+
+async function fetchFeed(feedUrl){
+  const domain=feedUrl.replace(/https?:\/\//,'').split('/')[0];
+  for(const{name,fn}of STRATEGIES){
+    try{
+      log(`&nbsp;&nbsp;<span style="color:var(--subtle)">▷ ${name}</span> ← ${domain}`);
+      const items=await fn(feedUrl);
+      if(items?.length>0){
+        log(`&nbsp;&nbsp;<span style="color:#00ff88">✓ ${name} OK — ${items.length} items</span>`);
+        return items;
+      }
+    }catch(e){
+      log(`&nbsp;&nbsp;<span style="color:#664444">✗ ${name}: ${esc(e.message||'failed')}</span>`);
+    }
+  }
   return null;
 }
-async function fetchSource(src){
-  renderLoading(src);
-  let items=null;
-  for(const feed of src.feeds){items=await fetchFeed(feed);if(items&&items.length)break}
-  if(!items||!items.length){renderError(src);return}
-  items.sort((a,b)=>b.date-a.date);
-  const uae=items.filter(i=>isUAE(i.title));
-  const war=items.filter(i=>!isUAE(i.title)&&isWar(i.title));
-  const rest=items.filter(i=>!isUAE(i.title)&&!isWar(i.title));
-  let sel=[...uae,...war,...rest];
-  const seen=new Set();
-  sel=sel.filter(i=>{const k=i.title.substring(0,50).toLowerCase();if(seen.has(k))return false;seen.add(k);return true});
-  sel=sel.slice(0,src.max);
-  collectAlerts(sel);showAlertBanner();renderItems(src,sel);
+
+/* ── UI ── */
+function setProgress(n){document.getElementById('progress-fill').style.width=(n/SOURCES.length*100)+'%';}
+function setDot(s){document.getElementById('status-dot').className=s==='loading'?'loading':s==='error'?'error':'';}
+function setSpinner(on){document.getElementById('refresh-icon').classList.toggle('spinning',on);}
+function updateTimestamp(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0');
+  const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()];
+  document.getElementById('meta-right').textContent=`UPDATED ${h}:${m} · ${now.getDate()} ${mo}`;
 }
-function renderLoading(src){
-  const c=$('card-'+src.id);c.className='card loading show';
-  c.innerHTML='<div class="card-head"><div class="card-name ldg">'+src.label+'</div><div class="card-badge">FETCHING\u2026</div></div><div class="card-body"><div class="skel"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:65%"></div><div class="skel"></div></div>';
+
+function buildCards(){
+  const wrap=document.getElementById('cards-wrap');
+  wrap.innerHTML='';
+  SOURCES.forEach((src,i)=>{
+    const card=document.createElement('div');
+    card.id='card-'+src.id;card.className='source-card loading';
+    card.style.animationDelay=(i*0.08)+'s';
+    card.innerHTML=`<div class="card-header"><div class="card-source-name">${esc(src.name)}</div><div class="card-badge">FETCHING</div></div>
+    <div class="card-body"><div class="skeleton-wrap">${[0,1,2].map(()=>`<div class="skeleton-item"><div class="skel-line w80"></div><div class="skel-line w55"></div><div class="skel-line w35"></div></div>`).join('')}</div></div>`;
+    wrap.appendChild(card);
+  });
 }
-function renderError(src){
-  const c=$('card-'+src.id);c.className='card error show';
-  c.innerHTML='<div class="card-head"><div class="card-name err">'+src.label+'</div><div class="card-badge red">UNAVAILABLE</div></div><div class="card-body"><div class="err-row">\u26A1 All feeds unavailable. Tap \u21BB to retry.</div></div>';
+
+function renderCard(id,state,items){
+  const card=document.getElementById('card-'+id);if(!card)return[];
+  const badge=card.querySelector('.card-badge'),body=card.querySelector('.card-body');
+  const src=SOURCES.find(s=>s.id===id);
+  card.className='source-card '+state;
+  if(state==='error'){
+    badge.textContent='UNAVAILABLE';
+    body.innerHTML=`<div class="card-error"><span class="card-error-icon">⚡</span>
+    <span>All proxies failed. If you opened this file directly from your desktop, that's why — browsers block cross-origin requests from <code>file://</code> origins.<br><br>
+    Fix: run <code>python3 -m http.server 8080</code> in this folder, then open <code>http://localhost:8080</code>. Click the ⚙ button for live diagnostics.</span></div>`;
+    return[];
+  }
+  const filtered=filterItems(items,src.max);
+  badge.textContent=filtered.length+' ITEMS';
+  if(!filtered.length){body.innerHTML=`<div class="card-error"><span>No matching items found.</span></div>`;return[];}
+  body.innerHTML=`<div class="news-list">${filtered.map(it=>{
+    const combined=it.title+' '+it.description;
+    const cls=kwMatch(combined,ALERT_KW)?'alert-match':kwMatch(combined,UAE_KW)?'uae-match':'';
+    const desc=it.description.length>140?it.description.slice(0,140)+'…':it.description;
+    return`<a class="news-item ${cls}" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">
+      <div class="news-title"><span class="news-bullet">›</span>${highlight(it.title||'Untitled')}</div>
+      ${desc?`<div class="news-desc">${esc(desc)}</div>`:''}
+      ${fmtDate(it.pubDate)?`<div class="news-time">${fmtDate(it.pubDate)}</div>`:''}
+    </a>`;
+  }).join('')}</div>`;
+  return filtered;
 }
-function renderItems(src,items){
-  const c=$('card-'+src.id);c.className='card done show';
-  const rows=items.map(i=>{
-    const cls=isAlrt(i.title)?'alrt':isUAE(i.title)?'uae':'';
-    const lnk=i.link?'<div class="item-src"><a href="'+esc(i.link)+'" target="_blank">\u2197 Read full article</a></div>':'';
-    return '<div class="item '+cls+'"><span class="item-bul">\u203A</span><div><div class="item-txt">'+highlight(i.title)+'</div>'+lnk+'</div></div>';
-  }).join('');
-  c.innerHTML='<div class="card-head"><div class="card-name">'+src.label+'</div><div class="card-badge">'+items.length+' HEADLINE'+(items.length!==1?'S':'')+'</div></div><div class="card-body"><div class="item-list">'+rows+'</div></div>';
+
+function updateAlert(allItems){
+  const found=new Set();
+  allItems.forEach(it=>{
+    const t=(it.title+' '+it.description).toLowerCase();
+    ALERT_KW.forEach(kw=>{if(t.includes(kw.toLowerCase()))found.add(kw.toUpperCase());});
+  });
+  const banner=document.getElementById('alert-banner'),kw=document.getElementById('alert-keywords');
+  if(found.size){
+    kw.textContent=[...found].join(' · ');banner.classList.add('visible');
+    banner.classList.remove('flash');void banner.offsetWidth;banner.classList.add('flash');
+  }else{banner.classList.remove('visible','flash');}
 }
-async function runAll(){
-  if(busy)return;busy=true;alertWords.clear();showAlertBanner();
-  const fab=$('fab');fab.classList.add('spin');setDot('loading');setProg(5);
-  for(let i=0;i<SOURCES.length;i++){await fetchSource(SOURCES[i]);setProg(5+((i+1)/SOURCES.length)*90)}
-  setProg(100);stamp();setDot('done');fab.classList.remove('spin');busy=false;
-  setTimeout(()=>setProg(0),1200);
+
+async function fetchAll(){
+  if(isLoading)return;
+  isLoading=true;diagLog.length=0;
+  setDot('loading');setSpinner(true);setProgress(0);buildCards();
+
+  const isFile=location.protocol==='file:';
+  if(isFile){
+    log(`<span style="color:var(--red)">⚠ OPENED AS file:// — cross-origin requests are blocked by this browser security policy.</span>`);
+    log(`<span style="color:var(--amber)">Recommended fix: run <strong>python3 -m http.server 8080</strong> in this folder, then open http://localhost:8080</span>`);
+    log(`<span style="color:var(--subtle)">Attempting all proxies anyway — some browsers/setups may still allow it...</span>`);
+    log('');
+    if(!diagVisible){diagVisible=true;document.getElementById('diag-banner').classList.add('visible');}
+  }else{
+    log(`<span style="color:var(--green)">✓ Origin: ${location.origin} — cross-origin requests permitted.</span>`);
+  }
+
+  const allDisplayed=[];let anyError=false;
+  for(let i=0;i<SOURCES.length;i++){
+    const src=SOURCES[i];
+    log(`<br><span style="color:var(--text);font-weight:bold">── ${src.name}</span>`);
+    let items=null;
+    for(const feedUrl of src.feeds){
+      try{items=await fetchFeed(feedUrl);if(items)break;}catch(e){}
+    }
+    if(items){const r=renderCard(src.id,'done',items);allDisplayed.push(...r);}
+    else{renderCard(src.id,'error',[]);anyError=true;log(`<span style="color:var(--red)">✗✗ All feeds exhausted for ${src.name}</span>`);}
+    setProgress(i+1);
+  }
+
+  updateAlert(allDisplayed);updateTimestamp();
+  setDot(anyError?'error':'done');setSpinner(false);isLoading=false;
+  if(diagVisible)renderDiag();
 }
-function openModal(){$('overlay').classList.add('open')}
-function closeModal(){$('overlay').classList.remove('open')}
-function maybeClose(e){if(e.target===$('overlay'))closeModal()}
-window.addEventListener('load',()=>{
-  SOURCES.forEach((s,i)=>setTimeout(()=>$('card-'+s.id).classList.add('show'),50*i));
-  runAll();
-});
+
+function handleRefresh(){if(!isLoading)fetchAll();}
+function openModal(){document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function handleOverlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+
+fetchAll();
 </script>
 </body>
 </html>
