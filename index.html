@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gulf War Live">
+<title>🛡️ Gulf War Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #080b0f;
+    --bg2:         #0d1117;
+    --bg3:         #111820;
+    --panel:       #131c26;
+    --border:      #1e2e3e;
+    --border2:     #243444;
+    --accent:      #00e5ff;
+    --accent2:     #ff4444;
+    --accent3:     #ffc107;
+    --green:       #00ff88;
+    --text:        #c8d8e8;
+    --text2:       #7a9ab8;
+    --text3:       #4a6a88;
+    --mono:        'Share Tech Mono', monospace;
+    --cond:        'Barlow Condensed', sans-serif;
+    --body:        'Barlow', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── scanline overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── noise texture ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.4;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(180deg, #080b0f 0%, #080b0fcc 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px 10px;
+  }
+
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .brand-title {
+    font-family: var(--cond);
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .brand-title span {
+    color: var(--accent);
+  }
+
+  .brand-sub {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  .status-dot.loading { background: var(--accent3); box-shadow: 0 0 8px var(--accent3); }
+  .status-dot.error   { background: var(--accent2); box-shadow: 0 0 8px var(--accent2); animation: none; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ── META BAR ── */
+  .meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+  }
+
+  .meta-left { display: flex; align-items: center; gap: 8px; }
+  .meta-tag  {
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    padding: 12px 12px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── SOURCE CARD ── */
+  .source-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s;
+  }
+
+  .source-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .source-card.card-loading {
+    border-color: rgba(255,193,7,0.3);
+  }
+
+  .source-card.card-error {
+    border-color: rgba(255,68,68,0.25);
+  }
+
+  .source-card.card-done {
+    border-color: rgba(0,229,255,0.2);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.25);
+  }
+
+  .card-source-name {
+    font-family: var(--cond);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .card-source-name::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .card-source-name.error-name::before { background: var(--accent2); }
+  .card-source-name.loading-name::before { background: var(--accent3); }
+
+  .card-badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+  }
+
+  .card-body {
+    padding: 10px 12px;
+    min-height: 48px;
+  }
+
+  /* ── LOADING SKELETON ── */
+  .skeleton-line {
+    height: 10px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--border2) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 3px;
+    margin-bottom: 8px;
+  }
+
+  .skeleton-line:last-child { margin-bottom: 0; width: 60%; }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── UPDATE ITEMS ── */
+  .update-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .update-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 9px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    border-left: 2px solid var(--border2);
+    transition: border-color 0.2s;
+  }
+
+  .update-item.uae-highlight {
+    border-left-color: var(--accent);
+    background: rgba(0,229,255,0.04);
+  }
+
+  .update-item.alert-highlight {
+    border-left-color: var(--accent2);
+    background: rgba(255,68,68,0.05);
+  }
+
+  .update-bullet {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text3);
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .update-text {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .update-text .kw-uae {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .update-text .kw-alert {
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  .update-text .kw-neutral {
+    color: var(--accent3);
+    font-weight: 500;
+  }
+
+  /* ── ERROR / UNAVAILABLE ── */
+  .unavailable {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    padding: 6px 0;
+  }
+
+  .unavailable-icon { font-size: 14px; }
+
+  /* ── CORS NOTE ── */
+  .cors-note {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--text3);
+    background: rgba(255,193,7,0.06);
+    border: 1px solid rgba(255,193,7,0.15);
+    border-radius: 4px;
+    padding: 8px 10px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+
+  .cors-note span { color: var(--accent3); font-weight: bold; }
+
+  /* ── ALERT BANNER ── */
+  .alert-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,68,68,0.1);
+    border: 1px solid rgba(255,68,68,0.4);
+    border-radius: 5px;
+    padding: 10px 12px;
+    animation: flash-border 1s ease-in-out 3;
+  }
+
+  .alert-banner.visible { display: flex; }
+
+  @keyframes flash-border {
+    0%, 100% { border-color: rgba(255,68,68,0.4); }
+    50%       { border-color: rgba(255,68,68,1); }
+  }
+
+  .alert-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .alert-text {
+    font-family: var(--cond);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  .alert-keywords {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: rgba(255,68,68,0.7);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  /* ── REFRESH BUTTON ── */
+  .fab {
+    position: fixed;
+    bottom: 28px;
+    right: 20px;
+    z-index: 200;
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00c4e0 0%, #006880 100%);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,229,255,0.35), 0 0 0 1px rgba(0,229,255,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fab:active {
+    transform: scale(0.93);
+    box-shadow: 0 2px 10px rgba(0,229,255,0.2);
+  }
+
+  .fab svg {
+    width: 24px; height: 24px;
+    fill: #fff;
+    transition: transform 0.5s ease;
+  }
+
+  .fab.spinning svg {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .fab-label {
+    position: absolute;
+    bottom: -18px;
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 28px;
+    background: linear-gradient(0deg, #080b0f 60%, transparent);
+    pointer-events: none;
+    z-index: 150;
+  }
+
+  /* ── PROXY INFO MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0);
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 4px;
+    margin: 0 auto 4px;
+  }
+
+  .modal-title {
+    font-family: var(--cond);
+    font-weight: 800;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .modal-body {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text2);
+  }
+
+  .modal-body code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.15);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 3px 0;
+    word-break: break-all;
+  }
+
+  .modal-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-steps li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text2);
+  }
+
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(0,229,255,0.12);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .modal-close {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-family: var(--cond);
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  /* ── INFO BUTTON ── */
+  .info-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* ── LAST REFRESH ── */
+  .refresh-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    padding: 4px 16px 0;
+  }
+
+  /* ── STAGGER ANIMATION DELAYS ── */
+  .source-card:nth-child(1) { transition-delay: 0.05s; }
+  .source-card:nth-child(2) { transition-delay: 0.1s; }
+  .source-card:nth-child(3) { transition-delay: 0.15s; }
+  .source-card:nth-child(4) { transition-delay: 0.2s; }
+  .source-card:nth-child(5) { transition-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-title">🛡️ Gulf War <span>LIVE</span></div>
+      <div class="brand-sub">UAE · Dubai · Gulf Region Focus</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="info-btn" onclick="openModal()" aria-label="Info">?</button>
+      <div class="status-dot" id="statusDot"></div>
+    </div>
+  </div>
+  <div class="progress-bar" style="margin-top:8px;">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</div>
+
+<!-- META BAR -->
+<div class="meta-bar">
+  <div class="meta-left">
+    <span class="meta-tag">LIVE</span>
+    <span>4 SOURCES · UAE FILTERED</span>
+  </div>
+  <span id="lastRefreshMeta">—</span>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainContent">
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner" id="alertBanner">
+    <div class="alert-icon">⚠️</div>
+    <div>
+      <div class="alert-text">Critical Keywords Detected</div>
+      <div class="alert-keywords" id="alertKeywords"></div>
+    </div>
+  </div>
+
+  <!-- CORS NOTE -->
+  <div class="cors-note" id="corsNote" style="display:none;">
+    <span>⚙ CORS PROXY ACTIVE</span> — Fetching live news via allorigins.win proxy.
+    If updates show <em>unavailable</em>, the proxy may be rate-limited.
+    Tap <strong>↻</strong> to retry. Tap <strong>?</strong> for setup options.
+  </div>
+
+  <!-- SOURCE CARDS (populated by JS) -->
+  <div id="card-kt"  class="source-card card-loading"></div>
+  <div id="card-tn"  class="source-card card-loading"></div>
+  <div id="card-gn"  class="source-card card-loading"></div>
+  <div id="card-aj"  class="source-card card-loading"></div>
+
+</div>
+
+<!-- REFRESH FAB -->
+<button class="fab" id="fabBtn" onclick="runAll()" aria-label="Refresh">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+  </svg>
+  <span class="fab-label">REFRESH</span>
+</button>
+
+<div class="footer"></div>
+
+<!-- PROXY INFO MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">How This Works</div>
+    <div class="modal-body">
+      This webapp fetches live news via a <strong style="color:var(--accent)">CORS proxy</strong>
+      (allorigins.win) since Safari blocks direct cross-origin requests. No data is stored.
+    </div>
+    <ol class="modal-steps">
+      <li>
+        <span class="step-num">1</span>
+        <span>Open this file in <strong>Safari</strong> on your iPhone (other browsers may block the proxy)</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span>Tap the <strong>Share</strong> button → <em>Add to Home Screen</em> for widget-style access</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span>The <strong>↻</strong> button fetches fresh data from all 4 sources on demand</span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span>Sources: <code>khaleejtimes.com</code> · <code>thenationalnews.com</code> · <code>gulfnews.com</code> · <code>aljazeera.com</code></span>
+      </li>
+      <li>
+        <span class="step-num">5</span>
+        <span>Keywords <span style="color:var(--accent)">UAE / Dubai / Gulf</span> are highlighted. <span style="color:var(--accent2)">Alert words</span> (strike, missile, etc.) trigger the red banner.</span>
+      </li>
+    </ol>
+    <button class="modal-close" onclick="closeModal()">Got It</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const PROXY = 'https://api.allorigins.win/get?url=';
+
+const SOURCES = [
+  {
+    id:      'kt',
+    label:   'Khaleej Times',
+    url:     'https://www.khaleejtimes.com/uae/day-18-israel-us-iran-war-live-updates',
+    fallback:'https://www.khaleejtimes.com/world/middle-east',
+    maxItems: 5,
+  },
+  {
+    id:      'tn',
+    label:   'The National',
+    url:     'https://www.thenationalnews.com/news/mena/2026/03/16/live-us-israel-iran-war-dubai-airport/',
+    fallback:'https://www.thenationalnews.com/news/mena/',
+    maxItems: 5,
+  },
+  {
+    id:      'gn',
+    label:   'Gulf News',
+    url:     'https://gulfnews.com/world/gulf/',
+    fallback:'https://gulfnews.com/world/mena',
+    maxItems: 4,
+  },
+  {
+    id:      'aj',
+    label:   'Al Jazeera',
+    url:     'https://www.aljazeera.com/news/liveblog/2025/10/live-us-israel-iran-war/',
+    fallback:'https://www.aljazeera.com/where/middle-east/',
+    maxItems: 4,
+  },
+];
+
+const UAE_KEYWORDS   = ['UAE', 'Dubai', 'Abu Dhabi', 'Gulf', 'airport', 'airspace', 'Emirati', 'Emirates', 'ADNOC', 'Hormuz'];
+const ALERT_KEYWORDS = ['attack', 'strike', 'missile', 'explosion', 'evacuate', 'bomb', 'warning', 'emergency', 'nuclear', 'closure', 'closed', 'airstrike', 'rocket', 'ballistic'];
+const GENERAL_KW     = ['Iran', 'Israel', 'US', 'ceasefire', 'hostage', 'Biden', 'Trump', 'Pentagon', 'war', 'military', 'forces', 'troops'];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let isLoading = false;
+let allAlertWords = new Set();
+
+// ─────────────────────────────────────────────
+// DOM HELPERS
+// ─────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+function setDot(state) {
+  const dot = $('statusDot');
+  dot.className = 'status-dot' + (state === 'loading' ? ' loading' : state === 'error' ? ' error' : '');
+}
+
+function setProgress(pct) {
+  $('progressFill').style.width = pct + '%';
+}
+
+function updateTimestamp() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const d = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  const str = `${d} · ${t}`;
+  $('lastRefreshMeta').textContent = str;
+}
+
+// ─────────────────────────────────────────────
+// CARD RENDERING
+// ─────────────────────────────────────────────
+function renderCardLoading(src) {
+  const card = $('card-' + src.id);
+  card.className = 'source-card card-loading visible';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-source-name loading-name">${src.label}</div>
+      <div class="card-badge">FETCHING…</div>
+    </div>
+    <div class="card-body">
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line" style="width:85%"></div>
+      <div class="skeleton-line" style="width:70%"></div>
+      <div class="skeleton-line"></div>
+    </div>
+  `;
+  requestAnimationFrame(() => card.classList.add('visible'));
+}
+
+function renderCardError(src, reason) {
+  const card = $('card-' + src.id);
+  card.className = 'source-card card-error visible';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-source-name error-name">${src.label}</div>
+      <div class="card-badge" style="color:var(--accent2)">UNAVAILABLE</div>
+    </div>
+    <div class="card-body">
+      <div class="unavailable">
+        <span class="unavailable-icon">⚡</span>
+        <span>Source unavailable${reason ? ': ' + reason : ''}. Tap ↻ to retry.</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderCardItems(src, items) {
+  const card = $('card-' + src.id);
+  card.className = 'source-card card-done visible';
+
+  const count = items.length;
+  const itemsHtml = items.map(text => {
+    const isUAE   = UAE_KEYWORDS.some(k => text.toLowerCase().includes(k.toLowerCase()));
+    const isAlert = ALERT_KEYWORDS.some(k => text.toLowerCase().includes(k.toLowerCase()));
+    const cls     = isAlert ? 'alert-highlight' : isUAE ? 'uae-highlight' : '';
+    const highlighted = highlightText(text);
+    return `
+      <div class="update-item ${cls}">
+        <span class="update-bullet">›</span>
+        <span class="update-text">${highlighted}</span>
+      </div>
+    `;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-source-name">${src.label}</div>
+      <div class="card-badge">${count} UPDATE${count !== 1 ? 'S' : ''}</div>
+    </div>
+    <div class="card-body">
+      <div class="update-list">
+        ${itemsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function highlightText(text) {
+  // Escape HTML first
+  let safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Highlight UAE keywords
+  UAE_KEYWORDS.forEach(kw => {
+    const re = new RegExp('(' + escapeRegex(kw) + ')', 'gi');
+    safe = safe.replace(re, '<span class="kw-uae">$1</span>');
+  });
+  // Highlight alert keywords
+  ALERT_KEYWORDS.forEach(kw => {
+    const re = new RegExp('(' + escapeRegex(kw) + ')', 'gi');
+    safe = safe.replace(re, '<span class="kw-alert">$1</span>');
+  });
+
+  return safe;
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ─────────────────────────────────────────────
+// TEXT EXTRACTION FROM RAW HTML
+// ─────────────────────────────────────────────
+function extractTextBlocks(html) {
+  // Remove scripts, styles, nav, footer, header tags
+  let clean = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<aside[\s\S]*?<\/aside>/gi, '')
+    .replace(/<figure[\s\S]*?<\/figure>/gi, '')
+    .replace(/<form[\s\S]*?<\/form>/gi, '');
+
+  // Strip all remaining HTML tags
+  clean = clean.replace(/<[^>]+>/g, ' ');
+
+  // Decode HTML entities
+  clean = clean
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&rsquo;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—');
+
+  // Collapse whitespace
+  clean = clean.replace(/\s+/g, ' ').trim();
+
+  // Split into sentences/chunks
+  const sentences = clean
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 40 && s.length < 500);
+
+  return sentences;
+}
+
+function filterRelevant(blocks, maxItems) {
+  // First pass: UAE/Gulf focused
+  const uaeBlocks = blocks.filter(b =>
+    UAE_KEYWORDS.some(k => b.toLowerCase().includes(k.toLowerCase()))
+  );
+
+  // Second pass: any war-relevant content
+  const warBlocks = blocks.filter(b =>
+    [...ALERT_KEYWORDS, ...GENERAL_KW, 'Iran', 'Israel'].some(k =>
+      b.toLowerCase().includes(k.toLowerCase())
+    )
+  );
+
+  // Prefer UAE blocks, fill with war blocks if needed
+  const combined = [...uaeBlocks];
+  warBlocks.forEach(b => { if (!combined.includes(b)) combined.push(b); });
+
+  // Deduplicate
+  const seen = new Set();
+  const deduped = combined.filter(b => {
+    const key = b.substring(0, 60).toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return deduped.slice(0, maxItems);
+}
+
+function detectAlertWords(items) {
+  items.forEach(text => {
+    ALERT_KEYWORDS.forEach(kw => {
+      if (text.toLowerCase().includes(kw.toLowerCase())) {
+        allAlertWords.add(kw.toLowerCase());
+      }
+    });
+  });
+}
+
+function updateAlertBanner() {
+  const banner = $('alertBanner');
+  if (allAlertWords.size > 0) {
+    banner.classList.add('visible');
+    $('alertKeywords').textContent = 'Detected: ' + [...allAlertWords].join(' · ').toUpperCase();
+  } else {
+    banner.classList.remove('visible');
+  }
+}
+
+// ─────────────────────────────────────────────
+// FETCH ONE SOURCE
+// ─────────────────────────────────────────────
+async function fetchSource(src) {
+  renderCardLoading(src);
+
+  const tryFetch = async (targetUrl) => {
+    const proxyUrl = PROXY + encodeURIComponent(targetUrl);
+    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const json = await resp.json();
+    if (!json.contents) throw new Error('Empty response');
+    return json.contents;
+  };
+
+  let html = null;
+  try {
+    html = await tryFetch(src.url);
+  } catch (e1) {
+    // Try fallback URL
+    try {
+      html = await tryFetch(src.fallback);
+    } catch (e2) {
+      renderCardError(src, 'Network error');
+      return [];
+    }
+  }
+
+  const blocks = extractTextBlocks(html);
+  const items  = filterRelevant(blocks, src.maxItems);
+
+  if (items.length === 0) {
+    // Last resort: show first 3 non-trivial sentences regardless of keyword
+    const fallbackItems = blocks
+      .filter(b => b.length > 60)
+      .slice(0, 3);
+
+    if (fallbackItems.length === 0) {
+      renderCardError(src, 'No content extracted');
+      return [];
+    }
+    renderCardItems(src, fallbackItems);
+    detectAlertWords(fallbackItems);
+    return fallbackItems;
+  }
+
+  renderCardItems(src, items);
+  detectAlertWords(items);
+  return items;
+}
+
+// ─────────────────────────────────────────────
+// RUN ALL SOURCES
+// ─────────────────────────────────────────────
+async function runAll() {
+  if (isLoading) return;
+  isLoading = true;
+  allAlertWords.clear();
+
+  const fab = $('fabBtn');
+  fab.classList.add('spinning');
+  setDot('loading');
+  setProgress(5);
+  updateAlertBanner();
+  $('corsNote').style.display = 'block';
+
+  // Show all cards as loading immediately
+  SOURCES.forEach(src => renderCardLoading(src));
+
+  const step = 90 / SOURCES.length;
+
+  for (let i = 0; i < SOURCES.length; i++) {
+    await fetchSource(SOURCES[i]);
+    setProgress(5 + step * (i + 1));
+    updateAlertBanner();
+  }
+
+  setProgress(100);
+  updateTimestamp();
+  setDot('done');
+  fab.classList.remove('spinning');
+  isLoading = false;
+
+  // Fade progress bar
+  setTimeout(() => setProgress(0), 1200);
+}
+
+// ─────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────
+function openModal()  { $('modalOverlay').classList.add('open'); }
+function closeModal(e) {
+  if (!e || e.target === $('modalOverlay') || e.type === 'click') {
+    $('modalOverlay').classList.remove('open');
+  }
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Stagger card visibility
+  SOURCES.forEach((src, i) => {
+    const card = $('card-' + src.id);
+    setTimeout(() => card.classList.add('visible'), 60 * i);
+  });
+  runAll();
+});
+</script>
+</body>
+</html>
